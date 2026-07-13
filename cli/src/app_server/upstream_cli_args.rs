@@ -12,6 +12,9 @@
 use clap::ArgAction;
 use clap::Args;
 
+const EXEC_DEFAULT_MODEL: &str = "gpt-5.6-luna";
+const EXEC_DEFAULT_REASONING_EFFORT: &str = "max";
+
 /// Flags that should be forwarded to the upstream `codex` CLI when launching `codex app-server`.
 ///
 /// Note that [`UpstreamCodexCliArgs::to_upstream_codex_args`] intentionally **does not** forward
@@ -79,6 +82,24 @@ pub struct UpstreamCodexCliArgs {
 }
 
 impl UpstreamCodexCliArgs {
+    /// Fill defaults used by `codex-potter exec` without rewriting explicit CLI values.
+    pub fn apply_exec_defaults(&mut self) {
+        if self.model.is_none() {
+            self.model = Some(EXEC_DEFAULT_MODEL.to_string());
+        }
+
+        let has_reasoning_effort_override = self.config_overrides.iter().any(|override_kv| {
+            override_kv
+                .split_once('=')
+                .is_some_and(|(key, _)| key.trim() == "model_reasoning_effort")
+        });
+        if !has_reasoning_effort_override {
+            self.config_overrides.push(format!(
+                "model_reasoning_effort=\"{EXEC_DEFAULT_REASONING_EFFORT}\""
+            ));
+        }
+    }
+
     /// Render CLI args for launching `codex-potter app-server` as a subprocess.
     ///
     /// These args are the "user-facing" ones, preserving flags like `--model` and `--profile`.
@@ -229,6 +250,55 @@ fn toml_string_literal(input: &str) -> String {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn exec_defaults_fill_luna_model_and_max_effort() {
+        let mut args = UpstreamCodexCliArgs::default();
+
+        args.apply_exec_defaults();
+
+        assert_eq!(
+            args,
+            UpstreamCodexCliArgs {
+                config_overrides: vec!["model_reasoning_effort=\"max\"".to_string()],
+                model: Some("gpt-5.6-luna".to_string()),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn exec_defaults_preserve_explicit_model_and_high_effort() {
+        let mut args = UpstreamCodexCliArgs {
+            config_overrides: vec!["model_reasoning_effort=\"high\"".to_string()],
+            model: Some("custom-model".to_string()),
+            ..Default::default()
+        };
+        let expected = args.clone();
+
+        args.apply_exec_defaults();
+
+        assert_eq!(args, expected);
+    }
+
+    #[test]
+    fn exec_defaults_recognize_whitespace_and_unquoted_effort_override() {
+        let mut args = UpstreamCodexCliArgs {
+            config_overrides: vec!["  model_reasoning_effort = high".to_string()],
+            ..Default::default()
+        };
+
+        args.apply_exec_defaults();
+
+        assert_eq!(
+            args,
+            UpstreamCodexCliArgs {
+                config_overrides: vec!["  model_reasoning_effort = high".to_string()],
+                model: Some("gpt-5.6-luna".to_string()),
+                ..Default::default()
+            }
+        );
+    }
 
     #[test]
     fn upstream_args_translate_profile_and_search_to_config_overrides() {
