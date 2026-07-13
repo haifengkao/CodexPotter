@@ -291,6 +291,13 @@ fn load_exec_human_verbosity(cli_override: Option<CliVerbosity>) -> codex_tui::V
     }
 }
 
+fn prepare_exec_upstream_cli_args(
+    mut upstream_cli_args: crate::app_server::UpstreamCodexCliArgs,
+) -> crate::app_server::UpstreamCodexCliArgs {
+    upstream_cli_args.apply_exec_defaults();
+    upstream_cli_args
+}
+
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> anyhow::Result<()> {
     let cli = parse_cli();
@@ -307,6 +314,7 @@ async fn main() -> anyhow::Result<()> {
         verbosity,
     }) = cli.command.as_ref()
     {
+        let exec_upstream_cli_args = prepare_exec_upstream_cli_args(upstream_cli_args.clone());
         let workdir = if *json {
             resolve_workdir_or_exec_json_exit()
         } else {
@@ -324,7 +332,7 @@ async fn main() -> anyhow::Result<()> {
                     codex_bin,
                     backend_launch,
                     potter_xmodel: cli.xmodel,
-                    upstream_cli_args,
+                    upstream_cli_args: exec_upstream_cli_args,
                 },
             )
             .await
@@ -338,7 +346,7 @@ async fn main() -> anyhow::Result<()> {
                     codex_bin,
                     backend_launch,
                     potter_xmodel: cli.xmodel,
-                    upstream_cli_args,
+                    upstream_cli_args: exec_upstream_cli_args,
                 },
                 load_exec_human_verbosity(*verbosity),
             )
@@ -848,6 +856,45 @@ async fn maybe_prompt_startup_verbosity(
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn exec_preparation_applies_luna_and_max_defaults() {
+        let args =
+            prepare_exec_upstream_cli_args(crate::app_server::UpstreamCodexCliArgs::default());
+
+        assert_eq!(
+            args,
+            crate::app_server::UpstreamCodexCliArgs {
+                config_overrides: vec!["model_reasoning_effort=\"max\"".to_string()],
+                model: Some("gpt-5.6-luna".to_string()),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn exec_preparation_preserves_explicit_high_effort() {
+        let args = prepare_exec_upstream_cli_args(crate::app_server::UpstreamCodexCliArgs {
+            config_overrides: vec!["model_reasoning_effort=\"high\"".to_string()],
+            ..Default::default()
+        });
+
+        assert_eq!(
+            args,
+            crate::app_server::UpstreamCodexCliArgs {
+                config_overrides: vec!["model_reasoning_effort=\"high\"".to_string()],
+                model: Some("gpt-5.6-luna".to_string()),
+                ..Default::default()
+            }
+        );
+    }
+
+    #[test]
+    fn unprepared_upstream_arguments_have_no_exec_defaults() {
+        let args = crate::app_server::UpstreamCodexCliArgs::default();
+
+        assert_eq!(args, crate::app_server::UpstreamCodexCliArgs::default());
+    }
 
     #[test]
     fn rounds_must_be_at_least_one() {

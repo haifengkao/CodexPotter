@@ -82,6 +82,10 @@ Runs CodexPotter headlessly from the current working directory.
 - Human-readable mode does not reuse interactive folding/coalescing. It renders the same class of
   content, but every block is emitted append-only so the output can be piped safely.
 - Color output follows terminal capability detection and respects `NO_COLOR` / `FORCE_COLOR`.
+- When no `--model` is supplied, `exec` uses `gpt-5.6-luna` with
+  `model_reasoning_effort="max"` by default.
+- An explicit `--config model_reasoning_effort="high"` (or another effort value) overrides the
+  default for that invocation.
 
 Examples:
 
