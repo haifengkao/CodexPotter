@@ -543,6 +543,7 @@ fn parse_reasoning_effort(value: &str) -> Option<ReasoningEffort> {
         "medium" => Some(ReasoningEffort::Medium),
         "high" => Some(ReasoningEffort::High),
         "xhigh" => Some(ReasoningEffort::XHigh),
+        "max" => Some(ReasoningEffort::Max),
         _ => None,
     }
 }
@@ -641,6 +642,32 @@ service_tier = "fast"
         assert_eq!(resolved.model, "gpt-5.2-codex");
         assert_eq!(resolved.reasoning_effort, Some(ReasoningEffort::High));
         assert!(resolved.is_fast);
+    }
+
+    #[test]
+    #[serial]
+    fn resolves_max_reasoning_effort_from_config() {
+        let codex_home = tempfile::tempdir().expect("tempdir");
+        let _env = EnvVarGuard::set("CODEX_HOME", codex_home.path());
+
+        write_config(
+            &codex_home.path().join("config.toml"),
+            r#"
+model = "gpt-5.6-luna"
+model_reasoning_effort = "max"
+"#,
+        );
+
+        let cwd = tempfile::tempdir().expect("cwd");
+        let resolved = resolve_codex_model_config(cwd.path()).expect("resolve");
+        assert_eq!(
+            resolved,
+            ResolvedCodexModelConfig {
+                model: "gpt-5.6-luna".to_string(),
+                reasoning_effort: Some(ReasoningEffort::Max),
+                is_fast: false,
+            }
+        );
     }
 
     #[test]
