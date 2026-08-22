@@ -743,7 +743,7 @@ pub struct ThreadStartParams {
     pub approval_policy: Option<AskForApproval>,
     pub approvals_reviewer: Option<ApprovalsReviewer>,
     pub sandbox: Option<SandboxMode>,
-    pub permission_profile: Option<PermissionProfile>,
+    pub permissions: Option<String>,
     pub config: Option<HashMap<String, JsonValue>>,
     pub service_name: Option<String>,
     pub base_instructions: Option<String>,
@@ -794,7 +794,7 @@ pub struct ThreadResumeParams {
     pub approval_policy: Option<AskForApproval>,
     pub approvals_reviewer: Option<ApprovalsReviewer>,
     pub sandbox: Option<SandboxMode>,
-    pub permission_profile: Option<PermissionProfile>,
+    pub permissions: Option<String>,
     pub config: Option<HashMap<String, JsonValue>>,
     pub base_instructions: Option<String>,
     pub developer_instructions: Option<String>,
@@ -913,7 +913,7 @@ pub struct TurnStartParams {
     pub approval_policy: Option<AskForApproval>,
     pub approvals_reviewer: Option<ApprovalsReviewer>,
     pub sandbox_policy: Option<SandboxPolicy>,
-    pub permission_profile: Option<PermissionProfile>,
+    pub permissions: Option<String>,
     pub model: Option<String>,
     pub service_tier: Option<Option<ServiceTier>>,
     pub effort: Option<ReasoningEffort>,
@@ -1803,7 +1803,7 @@ mod tests {
     }
 
     #[test]
-    fn turn_start_params_round_trip_permission_profile_and_environments() {
+    fn turn_start_params_round_trip_named_permissions_and_environments() {
         let params: TurnStartParams = serde_json::from_value(json!({
             "threadId": "thread-1",
             "input": [],
@@ -1813,19 +1813,7 @@ mod tests {
                     "cwd": "/tmp/worktree"
                 }
             ],
-            "permissionProfile": {
-                "fileSystem": {
-                    "entries": [
-                        {
-                            "path": {
-                                "type": "path",
-                                "path": "/tmp/worktree"
-                            },
-                            "access": "write"
-                        }
-                    ]
-                }
-            }
+            "permissions": ":danger-full-access"
         }))
         .expect("deserialize turn/start params");
 
@@ -1833,16 +1821,7 @@ mod tests {
             params.environments.expect("environments")[0].environment_id,
             "local"
         );
-        assert_eq!(
-            params
-                .permission_profile
-                .expect("permission profile")
-                .file_system
-                .expect("file system")
-                .entries
-                .len(),
-            1
-        );
+        assert_eq!(params.permissions.as_deref(), Some(":danger-full-access"));
     }
 
     #[test]

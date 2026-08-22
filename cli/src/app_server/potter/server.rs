@@ -1903,6 +1903,7 @@ fn apply_yolo_default_to_launch(
     crate::app_server::AppServerLaunchConfig {
         spawn_sandbox: None,
         thread_sandbox: Some(crate::app_server::upstream_protocol::SandboxMode::DangerFullAccess),
+        permissions: None,
         bypass_approvals_and_sandbox: true,
     }
 }
@@ -2216,6 +2217,7 @@ git_branch: "main"
         let base = crate::app_server::AppServerLaunchConfig {
             spawn_sandbox: Some(crate::app_server::upstream_protocol::SandboxMode::ReadOnly),
             thread_sandbox: Some(crate::app_server::upstream_protocol::SandboxMode::ReadOnly),
+            permissions: None,
             bypass_approvals_and_sandbox: false,
         };
 
@@ -2226,6 +2228,7 @@ git_branch: "main"
                 thread_sandbox: Some(
                     crate::app_server::upstream_protocol::SandboxMode::DangerFullAccess
                 ),
+                permissions: None,
                 bypass_approvals_and_sandbox: true,
             }
         );
@@ -2235,6 +2238,7 @@ git_branch: "main"
             thread_sandbox: Some(
                 crate::app_server::upstream_protocol::SandboxMode::DangerFullAccess,
             ),
+            permissions: None,
             bypass_approvals_and_sandbox: true,
         };
         assert_eq!(apply_yolo_default_to_launch(base, false), base);
@@ -2250,6 +2254,7 @@ git_branch: "main"
         let base = crate::app_server::AppServerLaunchConfig {
             spawn_sandbox: Some(crate::app_server::upstream_protocol::SandboxMode::ReadOnly),
             thread_sandbox: Some(crate::app_server::upstream_protocol::SandboxMode::ReadOnly),
+            permissions: None,
             bypass_approvals_and_sandbox: false,
         };
 
@@ -2271,6 +2276,7 @@ git_branch: "main"
                 thread_sandbox: Some(
                     crate::app_server::upstream_protocol::SandboxMode::DangerFullAccess
                 ),
+                permissions: None,
                 bypass_approvals_and_sandbox: true,
             }
         );
@@ -2294,6 +2300,7 @@ git_branch: "main"
                 thread_sandbox: Some(
                     crate::app_server::upstream_protocol::SandboxMode::DangerFullAccess
                 ),
+                permissions: None,
                 bypass_approvals_and_sandbox: true,
             }
         );
@@ -2535,6 +2542,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -2681,6 +2689,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -2827,6 +2836,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -2885,6 +2895,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3043,6 +3054,7 @@ done
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3213,6 +3225,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3406,6 +3419,7 @@ git_branch: "main"
                     backend_launch: crate::app_server::AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                            permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     codex_compat_home: None,
@@ -3514,6 +3528,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3590,6 +3605,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3698,6 +3714,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3778,6 +3795,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3824,6 +3842,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -3999,6 +4018,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,
@@ -4118,6 +4138,7 @@ git_branch: "main"
             backend_launch: crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             codex_compat_home: None,

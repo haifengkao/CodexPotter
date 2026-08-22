@@ -370,7 +370,9 @@ fn potter_app_server_args(
         args.push("--xmodel".to_string());
     }
 
-    if launch.bypass_approvals_and_sandbox {
+    if launch.permissions.is_some() {
+        // Named permissions are mutually exclusive with the upstream sandbox flag.
+    } else if launch.bypass_approvals_and_sandbox {
         args.push("--dangerously-bypass-approvals-and-sandbox".to_string());
     }
 
@@ -440,6 +442,7 @@ mod tests {
             crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: Some(crate::app_server::upstream_protocol::SandboxMode::ReadOnly),
                 thread_sandbox: Some(crate::app_server::upstream_protocol::SandboxMode::ReadOnly),
+                permissions: None,
                 bypass_approvals_and_sandbox: false,
             },
             true,
@@ -490,6 +493,7 @@ mod tests {
             crate::app_server::AppServerLaunchConfig {
                 spawn_sandbox: None,
                 thread_sandbox: None,
+                permissions: None,
                 bypass_approvals_and_sandbox: true,
             },
             false,

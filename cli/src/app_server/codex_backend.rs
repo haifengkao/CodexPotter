@@ -213,6 +213,7 @@ struct StreamRecoveryContext {
 pub struct AppServerLaunchConfig {
     pub spawn_sandbox: Option<crate::app_server::upstream_protocol::SandboxMode>,
     pub thread_sandbox: Option<crate::app_server::upstream_protocol::SandboxMode>,
+    pub permissions: Option<&'static str>,
     pub bypass_approvals_and_sandbox: bool,
 }
 
@@ -224,6 +225,7 @@ impl AppServerLaunchConfig {
                 thread_sandbox: Some(
                     crate::app_server::upstream_protocol::SandboxMode::DangerFullAccess,
                 ),
+                permissions: None,
                 bypass_approvals_and_sandbox: true,
             };
         }
@@ -232,6 +234,7 @@ impl AppServerLaunchConfig {
         Self {
             spawn_sandbox: mode,
             thread_sandbox: mode,
+            permissions: None,
             bypass_approvals_and_sandbox: false,
         }
     }
@@ -406,7 +409,8 @@ async fn run_app_server_backend_inner(
                         thread_id,
                         model: upstream_cli_args.model.clone(),
                         developer_instructions,
-                        sandbox_mode: launch.thread_sandbox,
+                        sandbox_mode: launch.thread_sandbox.filter(|_| launch.permissions.is_none()),
+                        permissions: launch.permissions.map(str::to_string),
                         cwd: thread_cwd,
                     },
                     &mut recovery,
@@ -424,7 +428,8 @@ async fn run_app_server_backend_inner(
                     ThreadStartSettings {
                         model: upstream_cli_args.model.clone(),
                         developer_instructions,
-                        sandbox_mode: launch.thread_sandbox,
+                        sandbox_mode: launch.thread_sandbox.filter(|_| launch.permissions.is_none()),
+                        permissions: launch.permissions.map(str::to_string),
                         cwd: thread_cwd,
                     },
                     &mut recovery,
@@ -627,7 +632,9 @@ async fn spawn_app_server(
         cmd.arg(arg);
     }
 
-    if launch.bypass_approvals_and_sandbox {
+    if launch.permissions.is_some() {
+        // Named permissions are mutually exclusive with the upstream sandbox flag.
+    } else if launch.bypass_approvals_and_sandbox {
         cmd.arg("--dangerously-bypass-approvals-and-sandbox");
     }
     if let Some(mode) = launch.spawn_sandbox {
@@ -867,6 +874,7 @@ struct ThreadStartSettings {
     model: Option<String>,
     developer_instructions: Option<String>,
     sandbox_mode: Option<crate::app_server::upstream_protocol::SandboxMode>,
+    permissions: Option<String>,
     cwd: Option<PathBuf>,
 }
 
@@ -875,6 +883,7 @@ struct ThreadResumeSettings {
     model: Option<String>,
     developer_instructions: Option<String>,
     sandbox_mode: Option<crate::app_server::upstream_protocol::SandboxMode>,
+    permissions: Option<String>,
     cwd: Option<PathBuf>,
 }
 
@@ -888,7 +897,7 @@ impl ThreadStartSettings {
             approval_policy: Some(crate::app_server::upstream_protocol::AskForApproval::Never),
             approvals_reviewer: None,
             sandbox: self.sandbox_mode,
-            permission_profile: None,
+            permissions: self.permissions,
             config: None,
             service_name: None,
             base_instructions: None,
@@ -917,7 +926,7 @@ impl ThreadResumeSettings {
             approval_policy: Some(crate::app_server::upstream_protocol::AskForApproval::Never),
             approvals_reviewer: None,
             sandbox: self.sandbox_mode,
-            permission_profile: None,
+            permissions: self.permissions,
             config: None,
             base_instructions: None,
             developer_instructions: self.developer_instructions,
@@ -1047,7 +1056,7 @@ async fn handle_op(
                     approval_policy: None,
                     approvals_reviewer: None,
                     sandbox_policy: None,
-                    permission_profile: None,
+                    permissions: None,
                     model: None,
                     service_tier: None,
                     effort: None,
@@ -3948,6 +3957,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -3971,6 +3981,7 @@ done
             model: Some("o3".to_string()),
             developer_instructions: None,
             sandbox_mode: None,
+            permissions: None,
             cwd: None,
         }
         .into_params();
@@ -3987,6 +3998,7 @@ done
             model: Some("o3".to_string()),
             developer_instructions: None,
             sandbox_mode: None,
+            permissions: None,
             cwd: None,
         }
         .into_params();
@@ -4655,6 +4667,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -4778,6 +4791,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -4900,6 +4914,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -4985,6 +5000,7 @@ echo '{"id":1,"result":null}'
                 launch: AppServerLaunchConfig {
                     spawn_sandbox: None,
                     thread_sandbox: None,
+                    permissions: None,
                     bypass_approvals_and_sandbox: false,
                 },
                 upstream_cli_args: Default::default(),
@@ -5077,6 +5093,7 @@ echo {"id":2,"result":{"thread":{"id":"00000000-0000-0000-0000-000000000000","pr
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -5157,6 +5174,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -5241,6 +5259,7 @@ done
                 launch: AppServerLaunchConfig {
                     spawn_sandbox: None,
                     thread_sandbox: None,
+                    permissions: None,
                     bypass_approvals_and_sandbox: false,
                 },
                 upstream_cli_args: Default::default(),
@@ -5367,6 +5386,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -5511,6 +5531,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -5614,6 +5635,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -5726,6 +5748,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -5852,6 +5875,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -5997,6 +6021,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -6145,6 +6170,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -6304,6 +6330,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -6467,6 +6494,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -6653,6 +6681,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -6798,6 +6827,7 @@ done
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -6940,6 +6970,7 @@ touch "$MARKER"
                         thread_sandbox: Some(
                             crate::app_server::upstream_protocol::SandboxMode::DangerFullAccess,
                         ),
+                        permissions: None,
                         bypass_approvals_and_sandbox: true,
                     },
                     upstream_cli_args: Default::default(),
@@ -7034,6 +7065,7 @@ touch "$MARKER"
                         thread_sandbox: Some(
                             crate::app_server::upstream_protocol::SandboxMode::WorkspaceWrite,
                         ),
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -7113,6 +7145,7 @@ touch "$MARKER"
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
@@ -7201,6 +7234,7 @@ touch "$MARKER"
                     launch: AppServerLaunchConfig {
                         spawn_sandbox: None,
                         thread_sandbox: None,
+                        permissions: None,
                         bypass_approvals_and_sandbox: false,
                     },
                     upstream_cli_args: Default::default(),
